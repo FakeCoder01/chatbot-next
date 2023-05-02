@@ -63,24 +63,68 @@ export default function Chatbot() {
   }
 
   return (
-    <div>
-      <div className='h-[500px] max-h-[500px] bg-blue-200 my-0 px-4 py-3 overflow-y-auto w-[800px]'>
-        {messages.map((message, index) => (
-          <div key={index}>
-            {message.sender === 'user' ? (
-              <p className='text-gray-600 py-1'>You: {message.text}</p>
-            ) : (
-              <p className='text-purple-800 py-1'>Bot: {message.text}</p>
-            )}
+
+    <div className="container mx-auto max-w-4xl p-4">
+
+      <div
+          className="bg-gradient-to-br from-indigo-200 to-green-100 px-4 py-3 flex justify-between items-center rounded-t-xl">
+          <h3 className="text-lg font-bold text-gray-800 font-mono">Talk to PDF</h3>
+          <div className="flex items-center space-x-4">
+              <button className="p-2">
+                  <i className="fas fa-share text-gray-600 hover:text-gray-900"></i>
+              </button>
+              <button className="p-2">
+                  <i id="cpybtn" className="fas fa-copy text-gray-600 hover:text-gray-900"></i>
+              </button>
+              <button className="p-2" onclick="window.location.href='/';">
+                  <i className="fas fa-times text-red-400 hover:text-red-700"></i>
+              </button>
           </div>
-        ))}
       </div>
-      <form onSubmit={handleSubmit} className='my-2'>
-        <input type="text" value={input} className='text-pink-600 text-xl px-3 py-1 w-[800px] block' onChange={(e) => setInput(e.target.value)} />
-        <button type="submit" className='bg-green-500 my-3 rounded-lg px-2 py-1 text-dark'>Send</button>
-        <input type="file" className='file:border file:border-solid float-right my-3' accept=".pdf" onChange={handleFileChange} />
-        {file && <p>Uploading {file.name}...</p>}
-      </form>
-    </div>
+      <div className="bg-gray-100 p-4">
+          <div className="chat-history h-[77vh] overflow-y-auto">
+            {messages.map((message, index) => (
+              <div key={index}>
+                {message.sender === 'user' ? (
+
+                  <div class="flex items-center justify-end mt-2">
+                    <div class="rounded-3xl bg-indigo-400 text-white py-2 px-4 mr-2">{message.text}</div>
+                    <div class="text-gray-400 text-sm font-semibold">{new Date().toLocaleTimeString([], { hour: 'numeric', minute: 'numeric', hour12: true })}</div>
+                  </div>
+ 
+                ) : (
+                    <div class="flex items-center mt-2 bot-response-copy">
+                      <div class="rounded-3xl bg-gray-200 text-gray-900 py-2 px-4 ml-2 mr-2">{message.text}</div>
+                      <div class="text-gray-400 text-sm font-semibold">{new Date().toLocaleTimeString([], { hour: 'numeric', minute: 'numeric', hour12: true })}</div>
+                  </div>
+
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="relative input-field">
+              <form id="form" enctype="multipart/form-data" onSubmit={handleSubmit}>
+                  <input type="text" name="message" id="message" onChange={(e) => setInput(e.target.value)}
+                      className="bg-white rounded-full border text-slate-900 border-gray-300 focus:outline-none focus:ring focus:ring-indigo-100 py-2 pr-4 pl-12 block w-full appearance-none leading-normal"
+                      placeholder="Type your message..."/>
+                  <div className="absolute inset-y-0 right-0 flex items-center">
+                      <button type="submit"
+                          className="bg-indigo-500 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline hover:bg-indigo-600">
+                          <i className="fas fa-paper-plane"></i>
+                      </button>
+                  </div>
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+                      <label className="cursor-pointer mr-2" for="file_input">
+                          <i id="btnIcon" className="fa-sharp fa-regular fa-file-pdf fa-xl text-[#3c3adf]"></i>
+                      </label>
+
+                      <input type="file" accept="application/pdf" onChange={handleFileChange}  name="pdf_file"
+                          id="file_input"/>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+
   );
 }
