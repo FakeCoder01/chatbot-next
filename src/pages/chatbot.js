@@ -1,42 +1,59 @@
 import { useState } from 'react';
-// import { Configuration, OpenAIApi } from "openai";
 
 import { OpenAI } from "langchain/llms/openai";
 import { BufferMemory } from "langchain/memory";
 import { ConversationChain } from "langchain/chains";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";  
-import { ChatOpenAI } from "langchain/chat_models/openai";  
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 
-// const configuration = new Configuration({
-//   apiKey: "",
-// });
-// const client = new OpenAIApi(configuration);
-const model = new OpenAI({ openAIApiKey: "", temperature: 0.9 });
+import { Chroma } from "langchain/vectorstores/chroma";
+import { CharacterTextSplitter } from "langchain/text_splitter";
+import { PDFLoader } from "langchain/document_loaders/fs/pdf";
+
+
+const OPENAI_API_KEY = "";
+
+const model = new OpenAI({ openAIApiKey: OPENAI_API_KEY, temperature: 0.9 });
 const memory = new BufferMemory();
+
+// const embeddings = new OpenAIEmbeddings({  
+//   openAIApiKey: OPENAI_API_KEY,
+// });
+
 const chain = new ConversationChain({ llm: model, memory: memory });
 
-const embeddings = new OpenAIEmbeddings({  
-  openAIApiKey: "",
-});
-
-
 async function sendMessage(text) {
-
   const res = await chain.call({ input: text });
-
-  // const response = await client.createCompletion({
-  //   model: "text-davinci-003",
-  //   prompt: text,
-  //   temperature: 0.6,
-  // });
   return res.response;
+}
+
+
+
+
+async function file_and_conversation() {
+  try {
+    const fileUrl = "filename.pdf";
+    const saveDirectory = "faiss-data/";
+    const loader = new PDFLoader(fileUrl);
+    const documents = await loader.load();
+    const textSplitter = new CharacterTextSplitter({ chunkSize: 1000, chunkOverlap: 0 });
+    const splitDocuments = await textSplitter.splitDocuments(documents);
+    const embeddings = new OpenAIEmbeddings({ openAIApiKey: OPENAI_API_KEY });
+    
+    const vectorDb = await Chroma.fromDocuments(splitDocuments, embeddings);
+
+    await vectorDb.saveLocal(saveDirectory);
+    // Remove the file (you may need to use a package like 'fs' to remove the file in Node.js)
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 
 export default function Chatbot() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [file, setFile] = useState(null);
-
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -46,6 +63,7 @@ export default function Chatbot() {
     const response = await sendMessage(input);
     setMessages([...newMessages, { text: response, sender: 'bot' }]);
     setInput('');
+    // file_and_conversation();
   }
 
   async function handleFileChange(e) {
